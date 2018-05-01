@@ -1,0 +1,89 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      {{searchQuery}} | Indexed {{getNumResults()}} results.
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <div class="wrapper">
+    <div class="main-panel">
+    <div class="main-content">
+  <div class="has-text-centered">
+    <pagination-controls (pageChange)="getPage($event)" id="server"></pagination-controls>
+  </div>
+  <div class="container-fluid">
+
+        <p-gmap [options]="options" (onOverlayClick)="handleOverlayClick($event)" [overlays]="getOverlays()" [style]="{'width':'100%','height':'320px'}" ></p-gmap>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div *ngFor="let result of getResultData() | paginate: { id: 'server', itemsPerPage: 10,
+            currentPage: p, totalItems: getTotalCount() }"
+             class="card results-cards">
+          <div (click)="getDocument(result.eventid)" class="card-content">
+            <h4 class="title"><b>{{result.attacktype1_txt}}</b></h4>
+            <p class="category"><b>{{result.country_txt}} - {{result.city}}, {{result.location}}</b></p>
+            <p>{{result.addnotes}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p-dialog appendTo="body" header="{{selectedResult.attacktype1_txt}}" [(visible)]="display" modal="modal" [responsive]="true"
+              [width]="800" [minWidth]="200" [minY]="70">
+
+      <p-tabView>
+        <p-tabPanel header="Information" leftIcon="fa-info">
+          <div class="row">
+            <div class="col-md-3"><p>Attack Type:</p></div>
+            <div class="col-md-9"><p>{{selectedResult.attacktype1_txt}}</p></div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><p>Location:</p></div>
+            <div class="col-md-9"><p>{{selectedResult.country_txt}} - {{selectedResult.city}}, {{selectedResult.location}}</p></div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><p>Summary:</p></div>
+            <div class="col-md-9"><p>{{selectedResult.summary}}</p></div>
+          </div>
+          <div class="row">
+            <div class="col-md-3"><p>Note:</p></div>
+            <div class="col-md-9"><p>{{selectedResult.addnotes}}</p></div>
+          </div>
+        </p-tabPanel>
+        <p-tabPanel header="Comments" leftIcon="fa-comments">
+          <div class="row">
+            <div class="col-md-3"><p>Comments:</p></div>
+            <div class="col-md-9">
+              <div *ngFor="let comment of selectedResult.comments">
+                <p> <b><i>{{comment.name}} says: </i></b>{{comment.comment}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 3%">
+            <div class="col-md-3"><p>Comment:</p></div>
+            <div class="col-md-9">
+              <div class="row" style="margin-bottom: 2%">
+                <input id="input" placeholder="Username" type="text" size="58" pInputText [(ngModel)]="comment.name">
+              </div>
+              <div class="row">
+                <textarea [rows]="5" placeholder="Write Comment" [cols]="60" [(ngModel)]="comment.comment" pInputTextarea autoResize="autoResize"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 2%">
+            <button [disabled]="!comment.comment || !comment.name" (click)="saveComment()" type="button" pButton icon="fa-send" (click)="display=false" label="Post Comment"></button>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+      <p-footer>
+        <button type="button" pButton icon="fa-close" (click)="display=false" label="Close"></button>
+      </p-footer>
+    </p-dialog>
+
+  </div>
+</div>
+    </div>
+  </div>
+</ion-content>
